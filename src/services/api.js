@@ -1,8 +1,12 @@
-const API_BASE = "https://employee-onboarding-api.onrender.com/api";
+const API_BASE =
+  import.meta.env.MODE === "development"
+    ? "/api"
+    : "https://employee-onboarding-api.onrender.com/api";
 
 async function apiFetch(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   const res = await fetch(url, options);
+
   if (!res.ok) {
     const errorText = await res.text();
     throw new Error(`API error: ${res.status} - ${errorText}`);
