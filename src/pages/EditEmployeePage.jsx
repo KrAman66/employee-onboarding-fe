@@ -26,6 +26,8 @@ import {
   getEmployees,
 } from "../services/api";
 import EmployeeForm from "../components/EmployeeForm";
+import { useNavigate } from "react-router-dom";
+import { cleanPayload } from "../utils/formUtils";
 
 const steps = ["Personal & Job Information", "Address & Bank Information"];
 
@@ -34,6 +36,7 @@ const emptyForm = {
 };
 
 export default function EditEmployeePage() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [form, setForm] = useState(emptyForm);
   const [activeStep, setActiveStep] = useState(0);
@@ -87,13 +90,24 @@ export default function EditEmployeePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = cleanPayload(form);
+
+    // Remove empty manager
+    if (!payload.reporting_manager_id) {
+      delete payload.reporting_manager_id;
+    }
+
     try {
-      await updateEmployee(id, form);
+      await updateEmployee(id, payload);
       setSnackbar({
         open: true,
         message: "Employee updated successfully",
         error: false,
       });
+
+      setTimeout(() => {
+        navigate("/"); // ✅ Redirect after success
+      }, 1000);
     } catch (err) {
       setSnackbar({
         open: true,

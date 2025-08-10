@@ -24,6 +24,8 @@ import {
   getEmployees, // managers
 } from "../services/api";
 import EmployeeForm from "../components/EmployeeForm";
+import { useNavigate } from "react-router-dom";
+import { cleanPayload } from "../utils/formUtils";
 
 const steps = ["Personal & Job Information", "Address & Bank Information"];
 
@@ -56,6 +58,7 @@ const emptyForm = {
 };
 
 export default function CreateEmployeePage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState(emptyForm);
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -153,15 +156,22 @@ export default function CreateEmployeePage() {
       setSnackbar({ open: true, message: err, error: true });
       return;
     }
+
+    const payload = cleanPayload(form);
+
+    // If reporting_manager_id is empty, remove it
+    if (!payload.reporting_manager_id) {
+      delete payload.reporting_manager_id;
+    }
+
     try {
-      await createEmployee(form);
+      await createEmployee(payload);
       setSnackbar({
         open: true,
         message: "Employee created successfully",
         error: false,
       });
-      setForm(emptyForm);
-      setActiveStep(0);
+      setTimeout(() => navigate("/"), 1000); // ✅ Redirect to root
     } catch (err) {
       setSnackbar({
         open: true,
